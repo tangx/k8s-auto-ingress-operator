@@ -130,3 +130,12 @@ GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef
+
+
+
+deploy.all: docker-build redeploy
+
+redeploy: install deploy recreate
+
+recreate:
+	kubectl delete pod -l control-plane=controller-manager -n  k8s-auto-ingress-operator-system

@@ -1,0 +1,20 @@
+apiVersion: network.sodev.cc/v1
+kind: AutoIngress
+metadata:
+  name: sodev-cc
+  namespace: k8s-auto-ingress-operator-system
+
+spec:
+  rootDomain: sodev.cc
+
+---
+
+apiVersion: network.sodev.cc/v1
+kind: AutoIngress
+metadata:
+  name: sodev-cc-2
+  namespace: k8s-auto-ingress-operator-system
+
+spec:
+  rootDomain: tangx.in
+

@@ -29,7 +29,9 @@ type AutoIngressSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of AutoIngress. Edit autoingress_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Foo string `json:"foo,omitempty"`
+	RootDomain string `json:"rootDomain,omitempty"`
+	// TlsConfig  string `json:"tlsConfig"`
 }
 
 // AutoIngressStatus defines the observed state of AutoIngress
