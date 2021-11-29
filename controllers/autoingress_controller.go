@@ -94,8 +94,6 @@ func (r *AutoIngressReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			},
 			handler.Funcs{
 				CreateFunc: r.onCreateService,
-				UpdateFunc: r.onUpdaetService,
-				DeleteFunc: r.onDeleteService,
 			},
 		).
 		Complete(r)
@@ -103,7 +101,7 @@ func (r *AutoIngressReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *AutoIngressReconciler) onCreateService(e event.CreateEvent, q workqueue.RateLimitingInterface) {
 	logrus.Info("新 Service 被创建")
-	svc := r.GetService(e.Object)
+	svc := r.getService(e.Object)
 	if svc == nil {
 		return
 	}
@@ -117,6 +115,10 @@ func (r *AutoIngressReconciler) onCreateService(e event.CreateEvent, q workqueue
 		domain := op.Spec.RootDomain
 
 		ing := helper.NewIngress(domain, svc)
+		if r.isExistInK8s(ing) {
+			return
+		}
+
 		err := controllerutil.SetOwnerReference(svc, ing, r.Scheme)
 		if err != nil {
 			logrus.Errorf("SetOwnerReference failed: %v", err)
@@ -128,15 +130,18 @@ func (r *AutoIngressReconciler) onCreateService(e event.CreateEvent, q workqueue
 			logrus.Errorf("Create ingress faield: %v", err)
 		}
 	}
-
 }
 
-func (r *AutoIngressReconciler) onUpdaetService(e event.UpdateEvent, q workqueue.RateLimitingInterface) {
+// isExistInK8s 检查对象是否在 k8s 中存在
+func (r *AutoIngressReconciler) isExistInK8s(obj client.Object) bool {
 
-}
+	key := r.objectKey(obj)
+	err := r.Client.Get(context.TODO(), key, obj)
+	if err != nil {
+		return false
+	}
 
-func (r *AutoIngressReconciler) onDeleteService(e event.DeleteEvent, q workqueue.RateLimitingInterface) {
-
+	return true
 }
 
 func (r *AutoIngressReconciler) objectKey(e client.Object) types.NamespacedName {
@@ -146,7 +151,7 @@ func (r *AutoIngressReconciler) objectKey(e client.Object) types.NamespacedName 
 	}
 }
 
-func (r *AutoIngressReconciler) GetService(e client.Object) *corev1.Service {
+func (r *AutoIngressReconciler) getService(e client.Object) *corev1.Service {
 
 	key := r.objectKey(e)
 	svc := &corev1.Service{}
