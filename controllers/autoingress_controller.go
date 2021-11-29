@@ -32,8 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/sirupsen/logrus"
-	networkv1 "github.com/tangx/k8s-auto-ingress-operator/api/v1"
-	v1 "github.com/tangx/k8s-auto-ingress-operator/api/v1"
+	myappv1 "github.com/tangx/k8s-auto-ingress-operator/api/v1"
 	"github.com/tangx/k8s-auto-ingress-operator/controllers/helper"
 	"github.com/tangx/k8s-auto-ingress-operator/controllers/util"
 )
@@ -64,7 +63,7 @@ func (r *AutoIngressReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	defer logrus.Info("退出 Reconcile")
 
 	// TODO(user): your logic here
-	op := &v1.AutoIngress{}
+	op := &myappv1.AutoIngress{}
 
 	err := r.Client.Get(ctx, req.NamespacedName, op)
 	if err != nil {
@@ -84,13 +83,15 @@ func (r *AutoIngressReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 	autoIngressSet.Add(*op)
 
+	r.ReconcileServices(ctx, op)
+
 	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *AutoIngressReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&networkv1.AutoIngress{}).
+		For(&myappv1.AutoIngress{}).
 		Watches(
 			&source.Kind{
 				Type: &corev1.Service{},
@@ -109,27 +110,9 @@ func (r *AutoIngressReconciler) onCreateService(e event.CreateEvent, q workqueue
 		return
 	}
 
+	ctx := context.TODO()
 	for _, op := range autoIngressSet.List() {
-
-		if !util.IsValidServcieName(svc.Name, op.Spec.ServicePrefixes) {
-			continue
-		}
-
-		ing := helper.NewIngress(op, svc)
-		if r.isExistInK8s(ing) {
-			return
-		}
-
-		err := controllerutil.SetOwnerReference(svc, ing, r.Scheme)
-		if err != nil {
-			logrus.Errorf("SetOwnerReference failed: %v", err)
-			return
-		}
-
-		err = r.Client.Create(context.TODO(), ing)
-		if err != nil {
-			logrus.Errorf("Create ingress faield: %v", err)
-		}
+		r.HandleIngress(ctx, op, svc)
 	}
 }
 
@@ -163,4 +146,56 @@ func (r *AutoIngressReconciler) getService(e client.Object) *corev1.Service {
 	}
 
 	return svc
+}
+
+func (r *AutoIngressReconciler) HandleIngress(ctx context.Context, op myappv1.AutoIngress, svc *corev1.Service) {
+
+	if !util.IsValidServcieName(svc.Name, op.Spec.ServicePrefixes) {
+		return
+	}
+
+	ing := helper.NewIngress(op, svc)
+	_ing := helper.NewIngress(op, svc)
+	action := "create"
+
+	if r.isExistInK8s(_ing) {
+		action = "update"
+		ing.SetResourceVersion(_ing.ResourceVersion)
+	}
+
+	_ = controllerutil.SetOwnerReference(svc, ing, r.Scheme)
+	_ = controllerutil.SetOwnerReference(&op, ing, r.Scheme)
+
+	err := r.HandleObject(ctx, ing, action)
+	if err != nil {
+		logrus.Errorf("handle(%s) ingress (%s.%s) failed: %v", action, ing.Name, ing.Namespace, err)
+		return
+	}
+
+	logrus.Infof("handle(%s) ingress (%s.%s) success", action, ing.Name, ing.Namespace)
+}
+
+func (r *AutoIngressReconciler) HandleObject(ctx context.Context, obj client.Object, action string) error {
+
+	switch action {
+	case "update":
+		return r.Client.Update(ctx, obj)
+	case "create":
+		return r.Client.Create(ctx, obj)
+	}
+
+	return nil
+}
+
+func (r *AutoIngressReconciler) ReconcileServices(ctx context.Context, op *myappv1.AutoIngress) {
+	svcs := &corev1.ServiceList{}
+	err := r.Client.List(ctx, svcs)
+	if err != nil {
+		logrus.Errorf("list services failed: %v", err)
+		return
+	}
+
+	for _, svc := range svcs.Items {
+		r.HandleIngress(ctx, *op, &svc)
+	}
 }

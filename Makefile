@@ -150,3 +150,8 @@ install.export:
 .PHONY: deploy.export
 deploy.export: 
 	$(KUSTOMIZE) build config/default 
+
+
+.PHONY: release
+release:
+	$(KUSTOMIZE) build config/default > release/k8s-auto-ingress-operator.yml
