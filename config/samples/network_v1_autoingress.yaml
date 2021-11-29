@@ -1,0 +1,6 @@
+apiVersion: network.sodev.cc/v1
+kind: AutoIngress
+metadata:
+  name: autoingress-sample
+spec:
+  # TODO(user): Add fields here

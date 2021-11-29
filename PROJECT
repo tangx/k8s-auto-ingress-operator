@@ -1,0 +1,16 @@
+domain: sodev.cc
+layout:
+- go.kubebuilder.io/v3
+projectName: k8s-auto-ingress-operator
+repo: github.com/tangx/k8s-auto-ingress-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: sodev.cc
+  group: network
+  kind: AutoIngress
+  path: github.com/tangx/k8s-auto-ingress-operator/api/v1
+  version: v1
+version: "3"
