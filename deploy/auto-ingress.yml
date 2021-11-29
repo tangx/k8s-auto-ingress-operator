@@ -7,15 +7,3 @@ metadata:
 spec:
   rootDomain: sodev.cc
   # tlsSecretName: "wild-sodev-cc"
-
-# ---
-
-# apiVersion: network.sodev.cc/v1
-# kind: AutoIngress
-# metadata:
-#   name: sodev-cc-2
-#   namespace: k8s-auto-ingress-operator-system
-
-# spec:
-#   rootDomain: tangx.in
-
