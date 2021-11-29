@@ -28,10 +28,11 @@ type AutoIngressSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of AutoIngress. Edit autoingress_types.go to remove/update
-	// Foo string `json:"foo,omitempty"`
-	RootDomain string `json:"rootDomain,omitempty"`
-	// TlsConfig  string `json:"tlsConfig"`
+	// RootDomain 为自动生成域名规则的跟域名。
+	RootDomain string `json:"rootDomain"`
+
+	// TlsSecretName 使用的证书名称。 在 ingress-controller 的命名空间下。
+	TlsSecretName *string `json:"tlsSecretName,omitempty"`
 }
 
 // AutoIngressStatus defines the observed state of AutoIngress

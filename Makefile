@@ -89,6 +89,8 @@ endif
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
 
+
+
 .PHONY: uninstall
 uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/crd | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
@@ -139,3 +141,12 @@ redeploy: install deploy recreate
 
 recreate:
 	kubectl delete pod -l control-plane=controller-manager -n  k8s-auto-ingress-operator-system
+
+
+.PHONY: install.export
+install.export: 
+	$(KUSTOMIZE) build config/crd
+
+.PHONY: deploy.export
+deploy.export: 
+	$(KUSTOMIZE) build config/default 

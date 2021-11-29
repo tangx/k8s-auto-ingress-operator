@@ -68,7 +68,7 @@ func (r *AutoIngressReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	err := r.Client.Get(ctx, req.NamespacedName, ingOp)
 	if err != nil {
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	// 删除
@@ -112,9 +112,8 @@ func (r *AutoIngressReconciler) onCreateService(e event.CreateEvent, q workqueue
 	}
 
 	for _, op := range autoIngressSet.List() {
-		domain := op.Spec.RootDomain
 
-		ing := helper.NewIngress(domain, svc)
+		ing := helper.NewIngress(op, svc)
 		if r.isExistInK8s(ing) {
 			return
 		}

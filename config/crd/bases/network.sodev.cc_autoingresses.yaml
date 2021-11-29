@@ -37,9 +37,13 @@ spec:
             description: AutoIngressSpec defines the desired state of AutoIngress
             properties:
               rootDomain:
-                description: Foo is an example field of AutoIngress. Edit autoingress_types.go
-                  to remove/update Foo string `json:"foo,omitempty"`
+                description: RootDomain 为自动生成域名规则的跟域名。
                 type: string
+              tlsSecretName:
+                description: TlsSecretName 使用的证书名称。 在 ingress-controller 的命名空间下。
+                type: string
+            required:
+            - rootDomain
             type: object
           status:
             description: AutoIngressStatus defines the observed state of AutoIngress
