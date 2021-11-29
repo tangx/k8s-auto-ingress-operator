@@ -294,7 +294,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: tangxlab/auto-ingress-controller:v0.0.3
+        image: tangxlab/auto-ingress-controller:v0.0.4
         livenessProbe:
           httpGet:
             path: /healthz

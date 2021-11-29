@@ -40,17 +40,26 @@ kubectl apply -f deploy/tangx-in-ingresses.yml
 
 ```yaml
 # tangx-in-ingresses.yml
-apiVersion: network.tangx.in/v1
+apiVersion: network.sodev.cc/v1
 kind: AutoIngress
 metadata:
   name: tangx-in
   namespace: k8s-auto-ingress-operator-system
+  annotations:
+    kubernetes.io/ingress.class: nginx
 
 spec:
-  rootDomain: tangx.in
-  # tlsSecretName: "wild-tangx-in"
+  rootDomain: tangx.in 
+  servicePrefixes:
+    - "web-"
+    - "srv-"
+  tlsSecretName: "wild-tangx-in"
+
 ```
 
++ `rootDomain`: （必须） 后缀域名, 必须。
++ `servicePrefixes`: 指定适配以 **特定** 关键字开头的 service。 默认值为 `web- / srv-`。
++ `tlsSecretName`: （可选） 指定使用的 https 证书在 k8s 集群中的名字。
 
 ## 遗留问题
 

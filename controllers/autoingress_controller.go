@@ -79,7 +79,7 @@ func (r *AutoIngressReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	// 保存
-	if op.Spec.ServicePrefixes == nil {
+	if len(op.Spec.ServicePrefixes) == 0 {
 		op.Spec.ServicePrefixes = []string{"web-", "srv-"}
 	}
 	autoIngressSet.Add(*op)
