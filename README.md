@@ -2,7 +2,7 @@
 
 为 srv 和 web 开头的 service 创建对应的 ingress
 
-域名规则: `serviceName---namespace.YourRootDomain`
+域名规则: `<serviceName>---<namespace>.<rootDomain>`
 
 
 ```bash
