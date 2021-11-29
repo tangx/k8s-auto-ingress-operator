@@ -17,8 +17,8 @@ web-my-cs             ClusterIP   10.43.1.82      <none>        5678/TCP   134m
 kg ing
 
 NAME                  CLASS    HOSTS                                                   ADDRESS   PORTS     AGE
-srv-my-cs--sodev-cc   <none>   srv-my-cs---k8s-auto-ingress-operator-system.sodev.cc             80, 443   88m
-web-my-cs--sodev-cc   <none>   web-my-cs---k8s-auto-ingress-operator-system.sodev.cc             80, 443   9m17s
+srv-my-cs--tangx-in   <none>   srv-my-cs---k8s-auto-ingress-operator-system.tangx.in             80, 443   88m
+web-my-cs--tangx-in   <none>   web-my-cs---k8s-auto-ingress-operator-system.tangx.in             80, 443   9m17s
 ```
 
 
@@ -33,22 +33,22 @@ kubectl apply -f release/k8s-auto-ingress-operator.yml
 2. 创建域名规则
 
 ```bash
-kubectl apply -f deploy/sodev-cc-ingresses.yml
+kubectl apply -f deploy/tangx-in-ingresses.yml
 ```
 
 配置文件如下
 
 ```yaml
-# sodev-cc-ingresses.yml
-apiVersion: network.sodev.cc/v1
+# tangx-in-ingresses.yml
+apiVersion: network.tangx.in/v1
 kind: AutoIngress
 metadata:
-  name: sodev-cc
+  name: tangx-in
   namespace: k8s-auto-ingress-operator-system
 
 spec:
-  rootDomain: sodev.cc
-  # tlsSecretName: "wild-sodev-cc"
+  rootDomain: tangx.in
+  # tlsSecretName: "wild-tangx-in"
 ```
 
 

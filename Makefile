@@ -1,5 +1,5 @@
 
-VERSION ?= $(shell cat .version)
+VERSION ?= v$(shell cat .version)
 
 # Image URL to use all building/pushing image targets
 IMG ?= tangxlab/auto-ingress-controller:$(VERSION)
