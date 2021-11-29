@@ -33,6 +33,8 @@ type AutoIngressSpec struct {
 
 	// TlsSecretName 使用的证书名称。 在 ingress-controller 的命名空间下。
 	TlsSecretName *string `json:"tlsSecretName,omitempty"`
+
+	ServicePrefixes []string `json:"servicePrefixes,omitempty"`
 }
 
 // AutoIngressStatus defines the observed state of AutoIngress

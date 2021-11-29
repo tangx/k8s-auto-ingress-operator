@@ -8,6 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func NewIngress(op v1.AutoIngress, svc *corev1.Service) *netv1.Ingress {
@@ -20,12 +21,10 @@ func NewIngress(op v1.AutoIngress, svc *corev1.Service) *netv1.Ingress {
 
 	ing := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      ingname,
-			Namespace: svc.Namespace,
-			Labels:    svc.Labels,
-			Annotations: map[string]string{
-				"controller": "auto-ingress",
-			},
+			Name:        ingname,
+			Namespace:   svc.Namespace,
+			Labels:      svc.Labels,
+			Annotations: annotations(&op),
 		},
 		Spec: netv1.IngressSpec{
 			Rules: []netv1.IngressRule{
@@ -70,4 +69,18 @@ func NewIngress(op v1.AutoIngress, svc *corev1.Service) *netv1.Ingress {
 
 func ptrPathType(pt netv1.PathType) *netv1.PathType {
 	return &pt
+}
+
+func annotations(objs ...client.Object) map[string]string {
+
+	annos := make(map[string]string)
+	for _, obj := range objs {
+
+		for k, v := range obj.GetAnnotations() {
+			annos[k] = v
+		}
+	}
+
+	return annos
+
 }

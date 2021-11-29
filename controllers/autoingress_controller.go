@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -36,6 +35,7 @@ import (
 	networkv1 "github.com/tangx/k8s-auto-ingress-operator/api/v1"
 	v1 "github.com/tangx/k8s-auto-ingress-operator/api/v1"
 	"github.com/tangx/k8s-auto-ingress-operator/controllers/helper"
+	"github.com/tangx/k8s-auto-ingress-operator/controllers/util"
 )
 
 // AutoIngressReconciler reconciles a AutoIngress object
@@ -64,22 +64,25 @@ func (r *AutoIngressReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	defer logrus.Info("退出 Reconcile")
 
 	// TODO(user): your logic here
-	ingOp := &v1.AutoIngress{}
+	op := &v1.AutoIngress{}
 
-	err := r.Client.Get(ctx, req.NamespacedName, ingOp)
+	err := r.Client.Get(ctx, req.NamespacedName, op)
 	if err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	// 删除
-	if !ingOp.DeletionTimestamp.IsZero() {
-		autoIngressSet.Remove(*ingOp)
+	if !op.DeletionTimestamp.IsZero() {
+		autoIngressSet.Remove(*op)
 
 		return ctrl.Result{}, nil
 	}
 
 	// 保存
-	autoIngressSet.Add(*ingOp)
+	if op.Spec.ServicePrefixes == nil {
+		op.Spec.ServicePrefixes = []string{"web-", "srv-"}
+	}
+	autoIngressSet.Add(*op)
 
 	return ctrl.Result{}, nil
 }
@@ -106,12 +109,11 @@ func (r *AutoIngressReconciler) onCreateService(e event.CreateEvent, q workqueue
 		return
 	}
 
-	if !strings.HasPrefix(svc.Name, "web-") && !strings.HasPrefix(svc.Name, "srv-") {
-		logrus.Info("不支持自动创建 ingress: ", svc.Name)
-		return
-	}
-
 	for _, op := range autoIngressSet.List() {
+
+		if !util.IsValidServcieName(svc.Name, op.Spec.ServicePrefixes) {
+			continue
+		}
 
 		ing := helper.NewIngress(op, svc)
 		if r.isExistInK8s(ing) {

@@ -1,4 +1,3 @@
-# /data/gopath/src/github.com/tangx/k8s-auto-ingress-operator/bin/kustomize build config/default 
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -41,6 +40,10 @@ spec:
               rootDomain:
                 description: RootDomain 为自动生成域名规则的跟域名。
                 type: string
+              servicePrefixes:
+                items:
+                  type: string
+                type: array
               tlsSecretName:
                 description: TlsSecretName 使用的证书名称。 在 ingress-controller 的命名空间下。
                 type: string
@@ -291,7 +294,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: tangxlab/auto-ingress-controller:0.0.2
+        image: tangxlab/auto-ingress-controller:v0.0.3
         livenessProbe:
           httpGet:
             path: /healthz

@@ -1,9 +1,14 @@
 apiVersion: network.sodev.cc/v1
 kind: AutoIngress
 metadata:
-  name: sodev-cc
+  name: tangx-in
   namespace: k8s-auto-ingress-operator-system
+  annotations:
+    kubernetes.io/ingress.class: nginx
 
 spec:
-  rootDomain: sodev.cc
-  # tlsSecretName: "wild-sodev-cc"
+  rootDomain: tangx.in 
+  servicePrefixes:
+    - "web-"
+    - "srv-"
+  tlsSecretName: "wild-tangx-in"
