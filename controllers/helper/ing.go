@@ -2,7 +2,6 @@ package helper
 
 import (
 	"fmt"
-	"strings"
 
 	v1 "github.com/tangx/k8s-auto-ingress-operator/api/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -14,10 +13,8 @@ import (
 func NewIngress(op v1.AutoIngress, svc *corev1.Service) *netv1.Ingress {
 	domain := op.Spec.RootDomain
 
-	_domain := strings.ReplaceAll(domain, ".", "-")
-
 	host := fmt.Sprintf("%s---%s.%s", svc.Name, svc.Namespace, domain)
-	ingname := fmt.Sprintf("%s--%s", svc.Name, _domain)
+	ingname := fmt.Sprintf("%s--%s", svc.Name, op.Name)
 
 	ing := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
