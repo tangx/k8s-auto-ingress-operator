@@ -61,6 +61,7 @@ spec:
 + `servicePrefixes`: 指定适配以 **特定** 关键字开头的 service。 默认值为 `web- / srv-`。
 + `tlsSecretName`: （可选） 指定使用的 https 证书在 k8s 集群中的名字。
 
+<!--
 ## 遗留问题
 
 控制器启动时会获取所有的 service 。 如果这个时候没有 **域名规则** ， 将不会创建 ingress 规则。
@@ -68,5 +69,6 @@ spec:
 1. 发布控制器
 2. 发布规则
 3. **删除控制器 pod， 重新ingess**
+-->
 
 
