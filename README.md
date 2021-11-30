@@ -2,7 +2,7 @@
 
 为 srv 和 web 开头的 service 创建对应的 ingress
 
-域名规则: `<serviceName>---<namespace>.<rootDomain>`
+域名规则: `<serviceName>---<namespace>.<autoIngressName>`
 
 
 ```bash
@@ -35,6 +35,9 @@ kubectl apply -f release/k8s-auto-ingress-operator.yml
 ```bash
 kubectl apply -f deploy/tangx-in-ingresses.yml
 ```
+
+annotations 中定义的标签可以认为是公共标签， 最终将被继承到生成的 Ingress 中。 因此可以通过 annotation 选择的 IngressController， 并为该 Controller 配置一些公共标签。
+
 
 配置文件如下
 
