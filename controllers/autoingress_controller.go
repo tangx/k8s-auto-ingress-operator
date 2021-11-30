@@ -20,6 +20,8 @@ import (
 	"context"
 
 	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
@@ -101,6 +103,14 @@ func (r *AutoIngressReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				CreateFunc: r.onCreateService,
 			},
 		).
+		Watches(
+			&source.Kind{
+				Type: &netv1.Ingress{},
+			},
+			handler.Funcs{
+				DeleteFunc: r.onIngressDelete,
+			},
+		).
 		Complete(r)
 }
 
@@ -165,7 +175,7 @@ func (r *AutoIngressReconciler) HandleIngress(ctx context.Context, op myappv1.Au
 	}
 
 	_ = controllerutil.SetOwnerReference(svc, ing, r.Scheme)
-	_ = controllerutil.SetOwnerReference(&op, ing, r.Scheme)
+	// _ = controllerutil.SetOwnerReference(&op, ing, r.Scheme)
 
 	err := r.HandleObject(ctx, ing, action)
 	if err != nil {
@@ -199,4 +209,31 @@ func (r *AutoIngressReconciler) ReconcileServices(ctx context.Context, op *myapp
 	for _, svc := range svcs.Items {
 		r.HandleIngress(ctx, *op, &svc)
 	}
+}
+
+func (r *AutoIngressReconciler) onIngressDelete(e event.DeleteEvent, q workqueue.RateLimitingInterface) {
+
+	logrus.Infof("Ingress 删除: %s.%s", e.Object.GetName(), e.Object.GetNamespace())
+
+	ctx := context.TODO()
+
+	svc := &corev1.Service{}
+	for _, owner := range e.Object.GetOwnerReferences() {
+		if owner.Kind == "Service" {
+			key := types.NamespacedName{
+				Namespace: e.Object.GetNamespace(),
+				Name:      owner.Name,
+			}
+			err := r.Client.Get(ctx, key, svc)
+			// 如果是删除 svc 早成的 删除 ingress 就略过
+			if apierrors.IsNotFound(err) {
+				return
+			}
+		}
+	}
+
+	for _, op := range autoIngressSet.List() {
+		r.HandleIngress(ctx, op, svc)
+	}
+
 }

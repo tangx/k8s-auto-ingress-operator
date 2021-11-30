@@ -13,4 +13,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: tangxlab/auto-ingress-controller
-  newTag: v0.0.5
+  newTag: v0.0.6
